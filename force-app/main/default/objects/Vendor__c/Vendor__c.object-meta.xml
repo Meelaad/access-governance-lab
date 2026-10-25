@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Vendors we pay. The bank account is the field people would want to change for fraud.</description>
+    <enableHistory>true</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <label>Vendor</label>
+    <nameField>
+        <label>Vendor Name</label>
+        <trackHistory>true</trackHistory>
+        <type>Text</type>
+    </nameField>
+    <pluralLabel>Vendors</pluralLabel>
+    <sharingModel>ReadWrite</sharingModel>
+</CustomObject>
