@@ -1,0 +1,5 @@
+user,active,rule,risk,conflict,side_a,side_b
+OEPIC,frozen,SOD-04,Medium,Create vendors and enter invoices,Vendor__c:create from profile: System Administrator,Invoice__c:create from profile: System Administrator
+tek,yes,SOD-04,Medium,Create vendors and enter invoices,Vendor__c:create from profile: System Administrator,Invoice__c:create from profile: System Administrator
+OEPIC,frozen,SOD-06,Medium,View all data and export reports,perm:ViewAllData from profile: System Administrator,perm:ExportReport from profile: System Administrator
+tek,yes,SOD-06,Medium,View all data and export reports,perm:ViewAllData from profile: System Administrator,perm:ExportReport from profile: System Administrator

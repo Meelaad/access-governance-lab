@@ -1,0 +1,11 @@
+user,role,profile,active,Invoice__c.Amount__c:edit,Invoice__c.Vendor__c:edit,Invoice__c:create,Invoice__c:delete,Invoice__c:edit,Invoice__c:read,Payment__c.Amount__c:edit,Payment__c.Approved__c:edit,Payment__c.Invoice__c:edit,Payment__c:create,Payment__c:delete,Payment__c:edit,Payment__c:read,Vendor__c.Bank_Account__c:edit,Vendor__c:create,Vendor__c:delete,Vendor__c:edit,Vendor__c:read,custom:Approve_Payments,perm:AssignPermissionSets,perm:AuthorApex,perm:CustomizeApplication,perm:ExportReport,perm:ManageUsers,perm:ModifyAllData,perm:ViewAllData
+achen,AP_Clerk,Standard Platform User,yes,x,x,x,,x,x,,,,,,,,,,,,x,,,,,x,,,
+cnguyen,AP_Clerk,Standard Platform User,no,,,,,,,,,,,,,,,,,,,,,,,x,,,
+integ,,Analytics Cloud Integration User,yes,,,,,,x,,,,,,,x,,,,,x,,,,,,,,x
+jpatel,AP_Manager,Standard Platform User,yes,,,,,,x,,x,,,,x,x,,,,,x,x,,,,x,,,
+mlee,Sales_Analyst,Standard User,yes,,,,,,,,,,,,,,,,,,,,,,,x,,,
+OEPIC,,System Administrator,frozen,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,,x,x,x,x,x,x,x
+sec,,Analytics Cloud Security User,yes,,,,,,,,,,,,,,,,,,,,,,,,,,
+srivera,Vendor_Data,Standard Platform User,yes,,,,,,,,,,,,,,x,x,,x,x,,,,,x,,,
+tbrooks,IT_Support,Standard User,yes,,,,,,,,,,,,,,,,,,,,x,,,x,x,,
+tek,,System Administrator,yes,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,,x,x,x,x,x,x,x

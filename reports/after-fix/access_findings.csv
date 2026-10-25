@@ -1,0 +1,7 @@
+user,active,finding,detail
+integ,yes,privileged access,perm:ViewAllData from profile: Analytics Cloud Integration User
+OEPIC,frozen,privileged access,"perm:ModifyAllData from profile: System Administrator; perm:ViewAllData from profile: System Administrator; perm:ManageUsers from profile: System Administrator; perm:AuthorApex from profile: System Administrator; perm:CustomizeApplication from GenieAdmin, profile: System Administrator"
+OEPIC,frozen,not covered by the role policy,"no role in the policy, has Developer_Edition, Experience_Profile_Manager, GenieAdmin"
+tbrooks,yes,privileged access,perm:ManageUsers from User_Admin
+tek,yes,privileged access,"perm:ModifyAllData from profile: System Administrator; perm:ViewAllData from profile: System Administrator; perm:ManageUsers from profile: System Administrator; perm:AuthorApex from profile: System Administrator; perm:CustomizeApplication from GenieAdmin, profile: System Administrator"
+tek,yes,not covered by the role policy,"no role in the policy, has AgentforceServiceAgentBuilder, CopilotSalesforceAdmin, EinsteinGPTPromptTemplateManager, GenieAdmin, ServiceUserPsl"
