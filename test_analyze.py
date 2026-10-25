@@ -1,4 +1,4 @@
-from analyze import conflicts, effective, load_rules, other_findings, role_access
+from analyze import conflicts, effective, load_rules, other_findings, role_access, status
 
 
 def assignment(user, ps_id, name, profile=None):
@@ -57,5 +57,10 @@ assert "inactive user still has access" in [k for k, d in other_findings(leaver,
 assert [k for k, d in other_findings(no_role, {}, ["GenieAdmin"], policy)] == ["not covered by the role policy"]
 assert [k for k, d in other_findings(no_role, {"perm:ModifyAllData": {"profile: System Administrator"}}, [], policy)] == \
     ["privileged access"]
+
+# frozen only matters for an active user, inactive wins
+assert status(clerk) == "yes"
+assert status({"IsActive": True, "frozen": True}) == "frozen"
+assert status({"IsActive": False, "frozen": True}) == "no"
 
 print("all tests passed")

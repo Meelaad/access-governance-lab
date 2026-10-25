@@ -18,6 +18,17 @@ def fetch_users():
                      "WHERE UserType = 'Standard' ORDER BY Alias")
 
 
+def fetch_frozen():
+    return {r["UserId"] for r in org.query("SELECT UserId FROM UserLogin WHERE IsFrozen = true")}
+
+
+# a frozen user is still active in salesforce but can't log in
+def status(u):
+    if not u["IsActive"]:
+        return "no"
+    return "frozen" if u.get("frozen") else "yes"
+
+
 def fetch_assignments():
     return org.query("SELECT AssigneeId, PermissionSetId, PermissionSet.Name, PermissionSet.IsOwnedByProfile, "
                      "PermissionSet.Profile.Name, PermissionSetGroup.DeveloperName "
@@ -136,7 +147,7 @@ def write_csv(path, header, rows):
 
 def write_matrices(out, users, user_perms, roles, columns):
     write_csv(os.path.join(out, "user_matrix.csv"), ["user", "role", "profile", "active"] + columns,
-              [[u["Alias"], role_of(u), u["Profile"]["Name"], "yes" if u["IsActive"] else "no"]
+              [[u["Alias"], role_of(u), u["Profile"]["Name"], status(u)]
                + ["x" if c in user_perms[u["Id"]] else "" for c in columns] for u in users])
     write_csv(os.path.join(out, "role_matrix.csv"), ["role"] + columns,
               [[role] + ["x" if c in perms else "" for c in columns] for role, perms in roles.items()])
@@ -155,6 +166,9 @@ def main():
     os.makedirs(args.out, exist_ok=True)
 
     users = fetch_users()
+    frozen = fetch_frozen()
+    for u in users:
+        u["frozen"] = u["Id"] in frozen
     assignments = fetch_assignments()
     grants = fetch_grants()
     user_perms = {u["Id"]: effective(u["Id"], assignments, grants) for u in users}
@@ -174,7 +188,7 @@ def main():
     for u in users:
         perms = user_perms[u["Id"]]
         for rule, a, b in conflicts(perms, rules):
-            rows.append([u["Alias"], "yes" if u["IsActive"] else "no", rule["id"], rule["risk"], rule["name"],
+            rows.append([u["Alias"], status(u), rule["id"], rule["risk"], rule["name"],
                          explain(a, perms), explain(b, perms)])
     rows.sort(key=lambda r: (RISK_ORDER.get(r[3], 9), r[2], r[0]))
     write_csv(os.path.join(args.out, "sod_conflicts.csv"),
@@ -189,7 +203,7 @@ def main():
         assigned = sorted({source(a) for a in assignments
                            if a["AssigneeId"] == u["Id"] and not source(a).startswith("profile: ")})
         for kind, detail in other_findings(u, user_perms[u["Id"]], assigned, policy):
-            findings.append([u["Alias"], "yes" if u["IsActive"] else "no", kind, detail])
+            findings.append([u["Alias"], status(u), kind, detail])
     write_csv(os.path.join(args.out, "access_findings.csv"), ["user", "active", "finding", "detail"], findings)
     print()
     print(f"{len(findings)} other access findings")
