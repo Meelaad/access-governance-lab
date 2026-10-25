@@ -1,0 +1,10 @@
+action,user,permission_set,reason
+remove,achen,AP_Vendor_Maintenance,Not part of the AP Clerk role. Breaks SOD-04.
+remove,jpatel,AP_Vendor_Maintenance,Not part of the AP Manager role. Breaks SOD-01 and SOD-02.
+remove,cnguyen,AP_Invoice_Entry,Left the company.
+remove,cnguyen,AP_Payment_Approval,Left the company. Breaks SOD-03.
+remove,tbrooks,AP_Payment_Approval,Not part of the IT Support role. Breaks SOD-05.
+remove,mlee,View_All_Data,Not part of the Sales Analyst role. Breaks SOD-06.
+freeze,OEPIC,,"Second System Administrator that came with the org. Nobody uses it, so it gets frozen."
+accept,tek,,"My own admin account. An org needs one admin, so this stays, with field history on bank account and approvals and the setup audit trail as checks."
+accept,integ,,Salesforce's built-in analytics integration user. It can't log in like a person and View All Data comes from its locked profile.
