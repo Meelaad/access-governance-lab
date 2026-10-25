@@ -1,8 +1,6 @@
 # access-governance-lab
 
-Checking who can do what in a Salesforce org. This is a segregation of duties (SoD) conflict check and a role-to-permission matrix, built on a free Salesforce Developer Edition org with a small accounts payable setup.
-
-Still working on it.
+Checking who can do what in a Salesforce org. This is a segregation of duties (SoD) conflict check and a role-to-permission matrix, built on a free Salesforce Developer Edition org with a small accounts payable setup. The findings, ratings and fixes are written up in the [risk report](reports/sod-risk-report.pdf).
 
 ## The lab org
 force-app has the Salesforce metadata:
@@ -52,3 +50,37 @@ python test_analyze.py
 ```
 
 output/ is the default results folder and it's in .gitignore, so only the runs in reports get pushed.
+
+## First run
+The first run found 10 SoD conflicts across 7 users and 13 other findings (reports/first-run). All the access I planted showed up. The worst was jpatel, an AP manager with vendor maintenance on top of payment approval, which breaks SOD-02.
+
+It also found things I didn't plant:
+- A second System Administrator (OEPIC) that came with the Developer Edition org. Nobody uses it, but it has full access.
+- The Standard User and Standard Platform User profiles give Export Reports to everyone. That means my Report_Export permission set doesn't control anything, because Salesforce permissions only add up and a permission set can't take one away. Standard profiles can't be edited either.
+- Salesforce's analytics integration user has View All Data from its locked profile.
+- My admin account came with 5 extra permission sets for the AI features.
+
+The admins only got flagged for SOD-04 and SOD-06, because they don't have the Approve Payments permission. But an admin can switch off the validation rule or give themselves AP_Payment_Approval, so in practice they can break every rule. The analyzer doesn't catch that, so it's its own finding in the report.
+
+## Fixing it
+reports/remediation-plan.csv lists each change: remove a permission set, freeze a user, or accept the risk with a reason. remediate.py carries it out. Without --apply it only prints what it would do.
+
+```
+python remediate.py
+python remediate.py --apply
+```
+
+It removed six permission set assignments and froze OEPIC. I froze it instead of deactivating it in case the org needs it. My admin account and the integration user are accepted, with field history and the setup audit trail as the checks on the admin. Running it a second time changes nothing.
+
+## After the fix
+```
+python analyze.py --out reports/after-fix
+```
+
+This run found 4 conflicts across 2 users, all Medium, and 6 other findings. Everything left is on the two admin accounts (OEPIC frozen, mine accepted) and the integration user, and nobody has access outside the role policy anymore. The Export Reports problem is still open. The fix is custom profiles without it, so Report_Export is the only way to get it.
+
+## Risk report
+[reports/sod-risk-report.pdf](reports/sod-risk-report.pdf) has the scope, method and rules, then a rating for each of the 10 findings (likelihood and impact), who owns it, the fix, what risk is left, and recommendations.
+
+## Not covered
+The analyzer looks at what a user can do, not which records they can see, so record sharing isn't covered. Apex and flows that run in system mode, and login settings like MFA, aren't covered either.
