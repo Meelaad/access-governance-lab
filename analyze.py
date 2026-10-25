@@ -1,3 +1,6 @@
+import argparse
+import csv
+import os
 import org
 
 
@@ -64,13 +67,56 @@ def effective(user_id, assignments, grants):
     return perms
 
 
+def load_policy(path):
+    with open(path, newline="") as f:
+        return {r["role"]: r["allowed_permission_sets"].split("|") for r in csv.DictReader(f)}
+
+
+def fetch_set_ids():
+    return {r["Name"]: r["Id"] for r in org.query("SELECT Id, Name FROM PermissionSet WHERE IsOwnedByProfile = false")}
+
+
+# what each role is meant to have, from the permission sets the policy allows it
+def role_access(policy, set_ids, grants):
+    return {role: set().union(*(grants.get(set_ids.get(name), set()) for name in names))
+            for role, names in policy.items()}
+
+
+def write_csv(path, header, rows):
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(header)
+        w.writerows(rows)
+
+
+def write_matrices(out, users, user_perms, roles, columns):
+    write_csv(os.path.join(out, "user_matrix.csv"), ["user", "role", "profile", "active"] + columns,
+              [[u["Alias"], role_of(u), u["Profile"]["Name"], "yes" if u["IsActive"] else "no"]
+               + ["x" if c in user_perms[u["Id"]] else "" for c in columns] for u in users])
+    write_csv(os.path.join(out, "role_matrix.csv"), ["role"] + columns,
+              [[role] + ["x" if c in perms else "" for c in columns] for role, perms in roles.items()])
+
+
+def role_of(u):
+    return u["UserRole"]["DeveloperName"] if u["UserRole"] else ""
+
+
 def main():
+    parser = argparse.ArgumentParser(description="check who can do what in the salesforce org")
+    parser.add_argument("--policy", default="rules/role_policy.csv")
+    parser.add_argument("--out", default="output", help="folder for the csv results")
+    args = parser.parse_args()
+    os.makedirs(args.out, exist_ok=True)
+
     users = fetch_users()
     assignments = fetch_assignments()
     grants = fetch_grants()
-    for u in users:
-        perms = effective(u["Id"], assignments, grants)
-        print(u["Alias"], "active" if u["IsActive"] else "inactive", sorted(perms))
+    user_perms = {u["Id"]: effective(u["Id"], assignments, grants) for u in users}
+    roles = role_access(load_policy(args.policy), fetch_set_ids(), grants)
+
+    columns = sorted(set().union(*user_perms.values()))
+    write_matrices(args.out, users, user_perms, roles, columns)
+    print(f"{len(users)} users, {len(columns)} permissions, matrices written to {args.out}")
 
 
 if __name__ == "__main__":

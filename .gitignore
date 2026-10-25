@@ -7,3 +7,5 @@ __pycache__/
 # editor
 .idea/
 .vscode/
+# results from my own runs
+output/
