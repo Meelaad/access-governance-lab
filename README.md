@@ -10,6 +10,8 @@ force-app has the Salesforce metadata:
 - Five roles: AP_Clerk, AP_Manager, Vendor_Data, IT_Support and Sales_Analyst.
 - Field access for the admin profile. Deploying the fields doesn't give anyone access to them, so my first query failed with "No such column" until I added this.
 
+![validation rule](screenshots/validation-rule.png)
+
 setup_lab.py creates six test users with a role and permission sets each. Some of them get access they shouldn't have on purpose, so the analyzer has something to find. One of them (cnguyen) left the company and was deactivated, but nobody removed their permission sets.
 
 ```
@@ -27,7 +29,10 @@ rules/sod_rules.csv has six SoD rules. Each rule has two sides, and a user break
 - perm:ViewAllData for system permissions
 - custom:Approve_Payments for custom permissions
 
-For example SOD-02 is Vendor__c.Bank_Account__c:edit against custom:Approve_Payments. It's Critical because that person could change a vendor's bank account to their own and then approve the payment.
+For example SOD-02 is Vendor__c.Bank_Account__c:edit against custom:Approve_Payments. It's Critical because that person could change a vendor's bank account to their own and then approve the payment. AP_Vendor_Maintenance gives edit on the bank account and AP_Payment_Approval gives Approve Payments, so anyone with both of them breaks SOD-02.
+
+![vendor bank account access](screenshots/vendor-bank-account-access.png)
+![approve payments permission](screenshots/approve-payments-permission.png)
 
 rules/role_policy.csv lists which permission sets each role is allowed to have.
 
