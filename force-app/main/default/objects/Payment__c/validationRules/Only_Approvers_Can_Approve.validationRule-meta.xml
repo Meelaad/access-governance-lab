@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Only_Approvers_Can_Approve</fullName>
+    <active>true</active>
+    <description>A payment can only be approved by someone with the Approve Payments custom permission.</description>
+    <errorConditionFormula>AND(
+    Approved__c,
+    OR(ISNEW(), ISCHANGED(Approved__c)),
+    NOT($Permission.Approve_Payments)
+)</errorConditionFormula>
+    <errorDisplayField>Approved__c</errorDisplayField>
+    <errorMessage>You need the Approve Payments permission to approve a payment.</errorMessage>
+</ValidationRule>
