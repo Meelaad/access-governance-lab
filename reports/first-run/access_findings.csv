@@ -1,0 +1,14 @@
+user,active,finding,detail
+achen,yes,access outside the role policy,AP_Clerk doesn't allow AP_Vendor_Maintenance
+cnguyen,no,inactive user still has access,"AP_Invoice_Entry, AP_Payment_Approval"
+cnguyen,no,access outside the role policy,AP_Clerk doesn't allow AP_Payment_Approval
+integ,yes,privileged access,perm:ViewAllData from profile: Analytics Cloud Integration User
+jpatel,yes,access outside the role policy,AP_Manager doesn't allow AP_Vendor_Maintenance
+mlee,yes,privileged access,perm:ViewAllData from View_All_Data
+mlee,yes,access outside the role policy,Sales_Analyst doesn't allow View_All_Data
+OEPIC,yes,privileged access,"perm:ModifyAllData from profile: System Administrator; perm:ViewAllData from profile: System Administrator; perm:ManageUsers from profile: System Administrator; perm:AuthorApex from profile: System Administrator; perm:CustomizeApplication from GenieAdmin, profile: System Administrator"
+OEPIC,yes,not covered by the role policy,"no role in the policy, has Developer_Edition, Experience_Profile_Manager, GenieAdmin"
+tbrooks,yes,privileged access,perm:ManageUsers from User_Admin
+tbrooks,yes,access outside the role policy,IT_Support doesn't allow AP_Payment_Approval
+tek,yes,privileged access,"perm:ModifyAllData from profile: System Administrator; perm:ViewAllData from profile: System Administrator; perm:ManageUsers from profile: System Administrator; perm:AuthorApex from profile: System Administrator; perm:CustomizeApplication from GenieAdmin, profile: System Administrator"
+tek,yes,not covered by the role policy,"no role in the policy, has AgentforceServiceAgentBuilder, CopilotSalesforceAdmin, EinsteinGPTPromptTemplateManager, GenieAdmin, ServiceUserPsl"

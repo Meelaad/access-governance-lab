@@ -1,0 +1,6 @@
+role,Invoice__c.Amount__c:edit,Invoice__c.Vendor__c:edit,Invoice__c:create,Invoice__c:delete,Invoice__c:edit,Invoice__c:read,Payment__c.Amount__c:edit,Payment__c.Approved__c:edit,Payment__c.Invoice__c:edit,Payment__c:create,Payment__c:delete,Payment__c:edit,Payment__c:read,Vendor__c.Bank_Account__c:edit,Vendor__c:create,Vendor__c:delete,Vendor__c:edit,Vendor__c:read,custom:Approve_Payments,perm:AssignPermissionSets,perm:AuthorApex,perm:CustomizeApplication,perm:ExportReport,perm:ManageUsers,perm:ModifyAllData,perm:ViewAllData
+AP_Clerk,x,x,x,,x,x,,,,,,,,,,,,x,,,,,,,,
+AP_Manager,,,,,,x,,x,,,,x,x,,,,,x,x,,,,,,,
+Vendor_Data,,,,,,,,,,,,,,x,x,,x,x,,,,,,,,
+IT_Support,,,,,,,,,,,,,,,,,,,,x,,,,x,,
+Sales_Analyst,,,,,,,,,,,,,,,,,,,,,,,x,,,
