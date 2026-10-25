@@ -1,6 +1,12 @@
 import org
 
 
+OBJECTS = ["Vendor__c", "Invoice__c", "Payment__c"]
+SYSTEM_PERMS = ["ModifyAllData", "ViewAllData", "ManageUsers", "AuthorApex", "CustomizeApplication",
+                "AssignPermissionSets", "ExportReport"]
+ACTIONS = ["Read", "Create", "Edit", "Delete"]
+
+
 def fetch_users():
     return org.query("SELECT Id, Alias, IsActive, Profile.Name, UserRole.DeveloperName FROM User "
                      "WHERE UserType = 'Standard' ORDER BY Alias")
@@ -21,12 +27,50 @@ def source(a):
     return a["PermissionSet"]["Name"]
 
 
+# what each permission set grants, as short tokens like Vendor__c:create or perm:ViewAllData.
+# profiles count too, every profile has a permission set behind it
+def fetch_grants():
+    grants = {}
+
+    def add(ps_id, token):
+        grants.setdefault(ps_id, set()).add(token)
+
+    objects = ", ".join(f"'{o}'" for o in OBJECTS)
+    for r in org.query("SELECT Id, " + ", ".join("Permissions" + p for p in SYSTEM_PERMS) + " FROM PermissionSet"):
+        for p in SYSTEM_PERMS:
+            if r["Permissions" + p]:
+                add(r["Id"], "perm:" + p)
+    for r in org.query("SELECT ParentId, SobjectType, PermissionsRead, PermissionsCreate, PermissionsEdit, "
+                       f"PermissionsDelete FROM ObjectPermissions WHERE SobjectType IN ({objects})"):
+        for action in ACTIONS:
+            if r["Permissions" + action]:
+                add(r["ParentId"], f"{r['SobjectType']}:{action.lower()}")
+    for r in org.query("SELECT ParentId, Field FROM FieldPermissions "
+                       f"WHERE PermissionsEdit = true AND SobjectType IN ({objects})"):
+        add(r["ParentId"], r["Field"] + ":edit")
+    names = {r["Id"]: r["DeveloperName"] for r in org.query("SELECT Id, DeveloperName FROM CustomPermission")}
+    for r in org.query("SELECT ParentId, SetupEntityId FROM SetupEntityAccess WHERE SetupEntityType = 'CustomPermission'"):
+        add(r["ParentId"], "custom:" + names.get(r["SetupEntityId"], r["SetupEntityId"]))
+    return grants
+
+
+# a user's access is everything from their profile, permission sets and groups added together
+def effective(user_id, assignments, grants):
+    perms = {}
+    for a in assignments:
+        if a["AssigneeId"] == user_id:
+            for token in grants.get(a["PermissionSetId"], ()):
+                perms.setdefault(token, set()).add(source(a))
+    return perms
+
+
 def main():
     users = fetch_users()
     assignments = fetch_assignments()
+    grants = fetch_grants()
     for u in users:
-        mine = [source(a) for a in assignments if a["AssigneeId"] == u["Id"]]
-        print(u["Alias"], "active" if u["IsActive"] else "inactive", mine)
+        perms = effective(u["Id"], assignments, grants)
+        print(u["Alias"], "active" if u["IsActive"] else "inactive", sorted(perms))
 
 
 if __name__ == "__main__":
