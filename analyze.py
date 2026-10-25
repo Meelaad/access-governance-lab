@@ -67,6 +67,33 @@ def effective(user_id, assignments, grants):
     return perms
 
 
+RISK_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
+
+
+def load_rules(path):
+    with open(path, newline="") as f:
+        rules = list(csv.DictReader(f))
+    for r in rules:
+        r["side_a"] = r["side_a"].split("|")
+        r["side_b"] = r["side_b"].split("|")
+    return rules
+
+
+# a rule is broken when someone has at least one permission from each side
+def conflicts(perms, rules):
+    found = []
+    for rule in rules:
+        a = [t for t in rule["side_a"] if t in perms]
+        b = [t for t in rule["side_b"] if t in perms]
+        if a and b:
+            found.append((rule, a, b))
+    return found
+
+
+def explain(tokens, perms):
+    return "; ".join(f"{t} from {', '.join(sorted(perms[t]))}" for t in tokens)
+
+
 def load_policy(path):
     with open(path, newline="") as f:
         return {r["role"]: r["allowed_permission_sets"].split("|") for r in csv.DictReader(f)}
@@ -103,6 +130,7 @@ def role_of(u):
 
 def main():
     parser = argparse.ArgumentParser(description="check who can do what in the salesforce org")
+    parser.add_argument("--rules", default="rules/sod_rules.csv")
     parser.add_argument("--policy", default="rules/role_policy.csv")
     parser.add_argument("--out", default="output", help="folder for the csv results")
     args = parser.parse_args()
@@ -117,6 +145,25 @@ def main():
     columns = sorted(set().union(*user_perms.values()))
     write_matrices(args.out, users, user_perms, roles, columns)
     print(f"{len(users)} users, {len(columns)} permissions, matrices written to {args.out}")
+
+    rules = load_rules(args.rules)
+    for role, perms in roles.items():
+        for rule, a, b in conflicts(perms, rules):
+            print(f"role design problem: {role} breaks {rule['id']} by itself")
+
+    rows = []
+    for u in users:
+        perms = user_perms[u["Id"]]
+        for rule, a, b in conflicts(perms, rules):
+            rows.append([u["Alias"], "yes" if u["IsActive"] else "no", rule["id"], rule["risk"], rule["name"],
+                         explain(a, perms), explain(b, perms)])
+    rows.sort(key=lambda r: (RISK_ORDER.get(r[3], 9), r[2], r[0]))
+    write_csv(os.path.join(args.out, "sod_conflicts.csv"),
+              ["user", "active", "rule", "risk", "conflict", "side_a", "side_b"], rows)
+    print()
+    print(f"{len(rows)} SoD conflicts across {len({r[0] for r in rows})} users")
+    for r in rows:
+        print(f"  {r[3]:<8} {r[2]}  {r[0]:<8} {r[4]}")
 
 
 if __name__ == "__main__":
