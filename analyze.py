@@ -8,6 +8,9 @@ OBJECTS = ["Vendor__c", "Invoice__c", "Payment__c"]
 SYSTEM_PERMS = ["ModifyAllData", "ViewAllData", "ManageUsers", "AuthorApex", "CustomizeApplication",
                 "AssignPermissionSets", "ExportReport"]
 ACTIONS = ["Read", "Create", "Edit", "Delete"]
+PRIVILEGED = ["perm:ModifyAllData", "perm:ViewAllData", "perm:ManageUsers", "perm:AuthorApex",
+              "perm:CustomizeApplication"]
+RISK_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 
 
 def fetch_users():
@@ -67,9 +70,6 @@ def effective(user_id, assignments, grants):
     return perms
 
 
-RISK_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
-
-
 def load_rules(path):
     with open(path, newline="") as f:
         rules = list(csv.DictReader(f))
@@ -92,6 +92,24 @@ def conflicts(perms, rules):
 
 def explain(tokens, perms):
     return "; ".join(f"{t} from {', '.join(sorted(perms[t]))}" for t in tokens)
+
+
+# things that aren't SoD conflicts but still need a look in an access review
+def other_findings(user, perms, assigned, policy):
+    found = []
+    admin = [t for t in PRIVILEGED if t in perms]
+    if admin:
+        found.append(("privileged access", explain(admin, perms)))
+    if not user["IsActive"] and assigned:
+        found.append(("inactive user still has access", ", ".join(assigned)))
+    role = role_of(user)
+    if role in policy:
+        extra = [name for name in assigned if name not in policy[role]]
+        if extra:
+            found.append(("access outside the role policy", f"{role} doesn't allow " + ", ".join(extra)))
+    elif assigned:
+        found.append(("not covered by the role policy", "no role in the policy, has " + ", ".join(assigned)))
+    return found
 
 
 def load_policy(path):
@@ -140,7 +158,8 @@ def main():
     assignments = fetch_assignments()
     grants = fetch_grants()
     user_perms = {u["Id"]: effective(u["Id"], assignments, grants) for u in users}
-    roles = role_access(load_policy(args.policy), fetch_set_ids(), grants)
+    policy = load_policy(args.policy)
+    roles = role_access(policy, fetch_set_ids(), grants)
 
     columns = sorted(set().union(*user_perms.values()))
     write_matrices(args.out, users, user_perms, roles, columns)
@@ -164,6 +183,18 @@ def main():
     print(f"{len(rows)} SoD conflicts across {len({r[0] for r in rows})} users")
     for r in rows:
         print(f"  {r[3]:<8} {r[2]}  {r[0]:<8} {r[4]}")
+
+    findings = []
+    for u in users:
+        assigned = sorted({source(a) for a in assignments
+                           if a["AssigneeId"] == u["Id"] and not source(a).startswith("profile: ")})
+        for kind, detail in other_findings(u, user_perms[u["Id"]], assigned, policy):
+            findings.append([u["Alias"], "yes" if u["IsActive"] else "no", kind, detail])
+    write_csv(os.path.join(args.out, "access_findings.csv"), ["user", "active", "finding", "detail"], findings)
+    print()
+    print(f"{len(findings)} other access findings")
+    for f in findings:
+        print(f"  {f[0]:<8} {f[2]}")
 
 
 if __name__ == "__main__":
