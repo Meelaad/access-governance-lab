@@ -1,0 +1,9 @@
+# salesforce cli
+.sf/
+.sfdx/
+# python
+__pycache__/
+.venv/
+# editor
+.idea/
+.vscode/

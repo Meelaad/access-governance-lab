@@ -1,0 +1,11 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true
+    }
+  ],
+  "name": "access-governance-lab",
+  "namespace": "",
+  "sourceApiVersion": "68.0"
+}
