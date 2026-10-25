@@ -1,0 +1,6 @@
+role,allowed_permission_sets
+AP_Clerk,AP_Invoice_Entry
+AP_Manager,AP_Payment_Approval
+Vendor_Data,AP_Vendor_Maintenance
+IT_Support,User_Admin
+Sales_Analyst,Report_Export

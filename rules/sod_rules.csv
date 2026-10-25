@@ -1,0 +1,7 @@
+id,name,side_a,side_b,risk,why
+SOD-01,Change vendors and approve payments,Vendor__c:create|Vendor__c:edit,custom:Approve_Payments,High,Someone could set up or change a vendor and then approve paying it.
+SOD-02,Change vendor bank details and approve payments,Vendor__c.Bank_Account__c:edit,custom:Approve_Payments,Critical,Someone could point a real vendor's payments to their own bank account and approve the payment.
+SOD-03,Enter invoices and approve payments,Invoice__c:create,custom:Approve_Payments,High,Someone could enter a fake invoice and approve paying it.
+SOD-04,Create vendors and enter invoices,Vendor__c:create,Invoice__c:create,Medium,Someone could create a fake vendor and enter invoices from it. A separate approver still has to approve the payment.
+SOD-05,Manage access and approve payments,perm:ManageUsers|perm:AssignPermissionSets,custom:Approve_Payments,High,"Someone who can hand out access could give themselves any AP duty, and they can already approve payments."
+SOD-06,View all data and export reports,perm:ViewAllData,perm:ExportReport,Medium,Someone could read every record in the org and take it out in a report export.
